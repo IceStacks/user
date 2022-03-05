@@ -48,6 +48,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
+        
         fields = ('email', 'first_name', 'last_name',
                     'gender', 'country', 'town', 'address',
                     'phone_number', 'identity_number','birth_date',
@@ -73,25 +74,55 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
+    #staff users can't see superuser and other staff users
+    #consider another solution.
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(is_superuser=False, is_staff=False)
+
+    #staff users can't give permission to other staff users
+    def get_fieldsets(self, request, obj=None):
+        if not obj:
+            return self.add_fieldsets
+
+        if request.user.is_superuser:
+            perm_fields = ('is_active', 'is_staff', 'is_superuser',
+                           'groups', 'user_permissions')
+        else:
+            # modify these to suit the fields you want your
+            # staff user to be able to edit
+            perm_fields = ()
+
+        return [(None, {'fields': ('email', 'password')}),
+                ('Personal info', {'fields': ('first_name', 'last_name', 'gender', 'country',
+                 'town', 'address', 'phone_number', 'identity_number','birth_date')}),
+                (('Permissions'), {'fields': perm_fields}),
+                ]
+            
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
     list_display = ('email', 'is_staff', 'is_active', 'is_superuser')
     list_filter = ('is_staff',)
-    fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'gender', 'country',
-         'town', 'address', 'phone_number', 'identity_number','birth_date')}),
-        ('Permissions', {'fields': ('groups', 'user_permissions', 'is_staff', 'is_superuser', 'is_active')}),
-    )
-    # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
-    # overrides get_fieldsets to use this attribute when creating a user.
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2')}
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "password1", "password2"),
+            },
         ),
     )
+    # fieldsets = (
+    #     (None, {'fields': ('email', 'password')}),
+    #     ('Personal info', {'fields': ('first_name', 'last_name', 'gender', 'country',
+    #      'town', 'address', 'phone_number', 'identity_number','birth_date')}),
+    #     ('Permissions', {'fields': ('groups', 'user_permissions', 'is_staff', 'is_superuser', 'is_active')}),
+    
+    # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
+    # overrides get_fieldsets to use this attribute when creating a user.
     search_fields = ('email',)
     ordering = ('email',)
     filter_horizontal = ()
