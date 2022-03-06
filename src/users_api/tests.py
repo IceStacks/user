@@ -22,7 +22,6 @@ class Test_Create_User(TestCase):
         user = User.objects.create_user(email='testuser@mail.com', password='123')
         self.assertEqual(user.email, user.__str__())
  
-
     def test_raises_error_when_no_email(self):
         self.assertRaises(ValueError, User.objects.create_user, email='', password='123')
 
@@ -43,7 +42,6 @@ class Test_Create_User(TestCase):
        with self.assertRaisesMessage(ValueError, 'Superuser must be assigned to is_staff=True.'):
            User.objects.create_superuser(email='super@mail.com', password='123',
                                          is_staff=False, is_active=True, is_superuser=True)
-
 
     def test_staff_user_can_login_admin_page(self):
         staff_user = User.objects.create_superuser(email='staff@mail.com', password='123', is_staff=True, is_active=True)
