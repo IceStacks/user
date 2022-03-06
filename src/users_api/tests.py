@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 from .models import User
 
 
-
+# refactor: create user data to use for all tests.
 class Test_Create_User(TestCase):
 
     def test_user_create(self):
@@ -17,6 +17,10 @@ class Test_Create_User(TestCase):
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_active)
         self.assertFalse(user.is_superuser)
+
+    def test_user_str(self):
+        user = User.objects.create_user(email='testuser@mail.com', password='123')
+        self.assertEqual(user.email, user.__str__())
  
 
     def test_raises_error_when_no_email(self):
