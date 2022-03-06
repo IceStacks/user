@@ -1,6 +1,11 @@
+from ast import arg
+from urllib import response
 from django.test import TestCase, Client
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
 from .models import User
-from django.contrib.auth.models import Permission, Group
+
 
 
 class Test_Create_User(TestCase):
@@ -45,3 +50,18 @@ class Test_Create_User(TestCase):
         login_page = '/admin/'
         response = client.get(login_page)
         self.assertEqual(response.status_code, 302)
+
+#===========================API TESTS======================================
+
+class UserTests(APITestCase):
+
+    def test_view_users(self):
+        url = reverse('users:listcreate')
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_view_user(self):
+        user = user = User.objects.create_superuser(email='super@mail.com', password='123')
+        url = reverse('users:detailcreate', args=[user.id])
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
