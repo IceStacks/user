@@ -1,4 +1,3 @@
-from urllib import request
 from rest_framework import generics
 from rest_framework.permissions import BasePermission
 from .models import User

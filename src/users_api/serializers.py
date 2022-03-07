@@ -1,5 +1,3 @@
-from asyncio.windows_events import NULL
-from tkinter.ttk import Style
 from rest_framework import serializers
 from .models import User
 
