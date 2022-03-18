@@ -1,25 +1,26 @@
 version: "3"
-  
+
 services:
   database:
     container_name: 'User-Database'
     image: postgres
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./data/db:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=user                         # WILL BE UPDATED
       - POSTGRES_USER=user                       # WILL BE UPDATED
       - POSTGRES_PASSWORD=password              # WILL BE UPDATED
-    ports: 
+    ports:
       - "5433:5432"                              # CHANGE 5433 AS YOU WISH
 
   app:
-    container_name: 'User-Application'
+    image: icestacks/user
+    container_name: 'User-App'
     build:
       context: .
       dockerfile: ./Dockerfile
-    restart: on-failure  # keep this. depends-on option not waiting for db to completly start.
+    restart: unless-stopped
     command: >
       sh -c "python ./src/manage.py migrate &&
              python ./src/manage.py runserver 0.0.0.0:8001"
@@ -30,8 +31,8 @@ services:
       - POSTGRES_USER=user                       # WILL BE UPDATED
       - POSTGRES_PASSWORD=password               # WILL BE UPDATED
       - DB_HOST=database                         # MODIFY THIS TO YOUR DATABASE SERVICE NAME
-      - SECRET_KEY=secretkey                     # WILL BE UPDATED                      
-    ports: 
+      - SECRET_KEY=secretkey                     # WILL BE UPDATED
+    ports:
       - "8001:8001"
     depends_on:
       - database
